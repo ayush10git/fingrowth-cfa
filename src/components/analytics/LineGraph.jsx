@@ -19,9 +19,9 @@ ChartJS.register(
   Legend
 );
 
-const LineGraph = ({ subject, testResults }) => {
+const LineGraph = ({ testResults, testDates }) => {
   const data = {
-    labels: testResults.map((_, index) => `Test ${index + 1}`),
+    labels: testDates, // Use testDates for the x-axis labels
     datasets: [
       {
         data: testResults,
@@ -45,6 +45,13 @@ const LineGraph = ({ subject, testResults }) => {
       },
     },
     scales: {
+      x: {
+        ticks: {
+          autoSkip: true,
+          maxRotation: 45,
+          minRotation: 0,
+        },
+      },
       y: {
         beginAtZero: true,
         max: 100,
@@ -57,8 +64,8 @@ const LineGraph = ({ subject, testResults }) => {
 
   return (
     <div className="flex flex-col w-full max-w-full p-4 bg-white rounded-md">
-      <h2 className="text-2xl font-regular mb-4 text-center">
-        {subject} Test Results
+      <h2 className="text-xl font-regular mb-4">
+        Timeline
       </h2>
       <div className="w-full h-[350px]">
         <Line data={data} options={options} />

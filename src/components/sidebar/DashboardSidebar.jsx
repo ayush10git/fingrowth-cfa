@@ -15,20 +15,31 @@ import {
   ChartArea,
   FileSpreadsheet,
   LayoutDashboard,
+  ChevronDown,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { useState } from "react";
 
 const items = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-  },
   {
     title: "Analytics",
     url: "/dashboard/analytics",
     icon: ChartArea,
+    subItems: [
+      {
+        title: "Overall Analytics",
+        url: "/dashboard/analytics",
+      },
+      {
+        title: "Mock Analytics",
+        url: "/dashboard/analytics/mock-analysis",
+      },
+      {
+        title: "Practice Analytics",
+        url: "/dashboard/analytics/concept-analysis",
+      },
+    ],
   },
   {
     title: "Mock Test",
@@ -45,9 +56,13 @@ const items = [
 export function DashboardSidebar() {
   const pathname = usePathname(); // Get the current path
   const { open } = useSidebar();
+  const [expanded, setExpanded] = useState(false); // For toggling submenus
 
   return (
-    <Sidebar collapsible="icon" className="w-64 bg-[#8E6FD8] flex flex-col z-50">
+    <Sidebar
+      collapsible="icon"
+      className="w-64 bg-[#8E6FD8] flex flex-col z-50"
+    >
       <SidebarContent className="flex-grow">
         {/* Logo Section */}
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -78,39 +93,73 @@ export function DashboardSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => {
-                const isActive = pathname === item.url; // Check if the current path exactly matches the item's URL
+                const isActive = pathname.startsWith(item.url); // Check if the path starts with the item's URL
 
                 return (
-                  <SidebarMenuItem
-                    key={item.title}
-                    className={`flex items-center justify-start group-data-[collapsible=icon]:justify-center my-1 ${
-                      open ? "rounded-xl px-2 py-2" : "rounded-full p-2"
-                    } ${
-                      isActive
-                        ? "bg-white text-[#8E6FD8]" // Active styles
-                        : "text-white" // Default styles
-                    }`}
-                  >
-                    <SidebarMenuButton asChild>
-                      <a
-                        href={item.url}
-                        className="flex items-center space-x-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:space-x-0"
-                      >
-                        <item.icon
-                          className={`w-6 h-6 ${
-                            isActive ? "text-[#8E6FD8]" : "text-white"
-                          }`} // Icon color based on active state
-                        />
-                        <span
-                          className={`transition-opacity group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:hidden ${
-                            isActive ? "text-[#8E6FD8]" : "text-white"
-                          }`} // Text color based on active state
+                  <div key={item.title}>
+                    <SidebarMenuItem
+                      className={`flex items-center justify-start group-data-[collapsible=icon]:justify-center my-1 ${
+                        open ? "rounded-xl px-2 py-2" : "rounded-full p-2"
+                      } ${
+                        isActive
+                          ? "bg-white text-[#8E6FD8]" // Active styles
+                          : "text-white" // Default styles
+                      }`}
+                    >
+                      <SidebarMenuButton asChild>
+                        <a
+                          href={item.url}
+                          className="flex items-center space-x-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:space-x-0"
                         >
-                          {item.title}
-                        </span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                          <item.icon
+                            className={`w-6 h-6 ${
+                              isActive ? "text-[#8E6FD8]" : "text-white"
+                            }`} // Icon color based on active state
+                          />
+                          <span
+                            className={`transition-opacity group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:hidden ${
+                              isActive ? "text-[#8E6FD8]" : "text-white"
+                            }`} // Text color based on active state
+                          >
+                            {item.title}
+                          </span>
+                        </a>
+                      </SidebarMenuButton>
+                      {item.subItems && open && (
+                        <button
+                          onClick={() => setExpanded((prev) => !prev)}
+                          className="ml-auto text-white"
+                        >
+                          <ChevronDown
+                            className={`w-4 h-4 transition-transform text-[#8E6FD8] ${
+                              expanded ? "rotate-180" : ""
+                            }`}
+                          />
+                        </button>
+                      )}
+                    </SidebarMenuItem>
+                    {item.subItems && expanded && open && (
+                      <div className="ml-8">
+                        {item.subItems.map((subItem) => {
+                          const isSubActive = pathname === subItem.url; // Check if the current path matches the submenu item's URL
+                          return (
+                            <SidebarMenuItem
+                              key={subItem.title}
+                              className={`flex items-center my-1 ${
+                                isSubActive
+                                  ? "text-[#ffffff] underline" // Add underline if active
+                                  : "text-white"
+                              }`}
+                            >
+                              <SidebarMenuButton asChild>
+                                <a href={subItem.url}>{subItem.title}</a>
+                              </SidebarMenuButton>
+                            </SidebarMenuItem>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </SidebarMenu>

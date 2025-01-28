@@ -13,8 +13,8 @@ const Dashboard = () => {
   const correctPercentage = ((totalSolved / totalQuestions) * 100).toFixed(1);
   const incorrectPercentage = (100 - correctPercentage).toFixed(1);
 
-  const subject = "Mathematics";
-  const testResults = [85, 78, 92, 88, 76];
+  const testResults = [85, 78, 92, 88, 76, 74, 63, 80, 65, 70, 90];
+  const testDates = ["01/01/2025", "05/01/2025", "10/01/2025", "15/01/2025", "20/01/2025", "25/01/2025", "30/01/2025", "02/02/2025", "07/02/2025", "12/02/2025", "17/02/2025"];
 
   return (
     <div className="absolute top-[60px] left-[60px] w-[calc(100vw-70px)] h-[calc(100vh-60px)] py-2">
@@ -48,7 +48,7 @@ const Dashboard = () => {
         </div>
 
         <div className="flex flex-col gap-3">
-          <LineGraph subject={subject} testResults={testResults} />
+          <LineGraph testResults={testResults} testDates={testDates} />
           <StackedBarChart />
         </div>
       </div>
