@@ -1,16 +1,27 @@
+import { Bookmark, BookmarkCheck } from "lucide-react";
 import React from "react";
 
 const QuestionDisplay = ({
   question,
   selectedAnswers,
   handleAnswerSelect,
-  currentQuestion,
-  totalQuestions,
+  bookmarkedQuestions,
+  handleBookmarkToggle,
 }) => {
   return (
     <div className="flex flex-col gap-5 text-lg">
-      <div className="bg-gray-200 px-3 py-2">
+      <div className="flex justify-between bg-gray-200 px-3 py-2">
         <span className="text-base"> {question.question}</span>
+        <div
+          onClick={() => handleBookmarkToggle(question.question_id)}
+          className="cursor-pointer"
+        >
+          {bookmarkedQuestions.includes(question.question_id) ? (
+            <BookmarkCheck className="w-5 h-5 text-yellow-500" />
+          ) : (
+            <Bookmark className="w-5 h-5 text-gray-500" />
+          )}
+        </div>
       </div>
 
       <div className="text-lg flex flex-col gap-4">
