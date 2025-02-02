@@ -1,8 +1,8 @@
 "use client";
+import { useRouter } from "next/navigation";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import Box from "@mui/material/Box";
-import Collapse from "@mui/material/Collapse";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -18,92 +18,48 @@ function createData(
   subject,
   questionsSolved,
   totalQuestions,
-  percentageCorrect,
-  topics
+  percentageCorrect
 ) {
   return {
     subject,
     questionsSolved,
     totalQuestions,
     percentageCorrect,
-    topics,
+    completion: ((questionsSolved / totalQuestions) * 100).toFixed(2),
   };
 }
 
 function Row(props) {
   const { row } = props;
-  const [open, setOpen] = React.useState(false);
+  const router = useRouter();
 
   return (
-    <React.Fragment>
-      <TableRow
-        sx={{
-          "& > *": { borderBottom: "unset", textAlign: "center" },
-        }}
+    <TableRow
+      sx={{
+        marginBottom: "8px", // Add gap between rows
+        backgroundColor: "white", // Ensure rows have a white background
+        borderRadius: "8px", // Rounded corners for rows
+        border: "1px solid #E0E0E0", // Add 1px gray border to rows
+        cursor: "pointer", // Make rows clickable
+        "&:hover": {
+          backgroundColor: "#f5f5f5", // Hover effect
+        },
+      }}
+      onClick={() => router.push(`/dashboard/practice/${row.subject}`)}
+    >
+      <TableCell
+        component="th"
+        scope="row"
+        sx={{ fontWeight: "bold", borderRadius: "8px 0 0 8px" }}
       >
-        <TableCell>
-          <IconButton
-            aria-label="expand row"
-            className="text-[#8E6FD8]"
-            size="small"
-            onClick={() => setOpen(!open)}
-          >
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </TableCell>
-        <TableCell component="th" scope="row">
-          {row.subject}
-        </TableCell>
-        <TableCell align="center">
-          {row.questionsSolved}/{row.totalQuestions}
-        </TableCell>
-        <TableCell align="center">{row.percentageCorrect}%</TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1, textAlign: "center" }}>
-              <Table
-                size="small"
-                aria-label="topics"
-                sx={{
-                  "& .MuiTableCell-root": { textAlign: "center" },
-                }}
-              >
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Topic</TableCell>
-                    <TableCell align="center">Questions Solved</TableCell>
-                    <TableCell align="center">Percentage Correct</TableCell>
-                    <TableCell align="center">Action</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {row.topics.map((topic) => (
-                    <TableRow key={topic.name}>
-                      <TableCell component="th" scope="row">
-                        {topic.name}
-                      </TableCell>
-                      <TableCell align="center">
-                        {topic.questionsSolved}/{topic.totalQuestions}
-                      </TableCell>
-                      <TableCell align="center">
-                        {topic.percentageCorrect}%
-                      </TableCell>
-                      <TableCell align="center">
-                        <button className="bg-[#8E6FD8] bg-opacity-70 text-white py-1 px-4 ">
-                          Practice
-                        </button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </React.Fragment>
+        {row.subject}
+      </TableCell>
+      <TableCell align="center">
+        {row.questionsSolved}/{row.totalQuestions}
+      </TableCell>
+      <TableCell align="center">{row.percentageCorrect}%</TableCell>
+      <TableCell align="center">{row.completion}%</TableCell>
+    </TableRow>
   );
 }
 
@@ -113,96 +69,71 @@ Row.propTypes = {
     questionsSolved: PropTypes.number.isRequired,
     totalQuestions: PropTypes.number.isRequired,
     percentageCorrect: PropTypes.number.isRequired,
-    topics: PropTypes.arrayOf(
-      PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        questionsSolved: PropTypes.number.isRequired,
-        totalQuestions: PropTypes.number.isRequired,
-        percentageCorrect: PropTypes.number.isRequired,
-      })
-    ).isRequired,
+    completion: PropTypes.string.isRequired,
   }).isRequired,
 };
 
 const rows = [
-  createData("Mathematics", 50, 60, 80, [
-    {
-      name: "Algebra",
-      questionsSolved: 20,
-      totalQuestions: 25,
-      percentageCorrect: 90,
-    },
-    {
-      name: "Geometry",
-      questionsSolved: 15,
-      totalQuestions: 20,
-      percentageCorrect: 75,
-    },
-    {
-      name: "Trigonometry",
-      questionsSolved: 15,
-      totalQuestions: 15,
-      percentageCorrect: 70,
-    },
-  ]),
-  createData("Physics", 30, 40, 70, [
-    {
-      name: "Kinematics",
-      questionsSolved: 10,
-      totalQuestions: 15,
-      percentageCorrect: 60,
-    },
-    {
-      name: "Dynamics",
-      questionsSolved: 20,
-      totalQuestions: 25,
-      percentageCorrect: 75,
-    },
-  ]),
-  createData("Chemistry", 40, 50, 85, [
-    {
-      name: "Organic Chemistry",
-      questionsSolved: 25,
-      totalQuestions: 30,
-      percentageCorrect: 90,
-    },
-    {
-      name: "Inorganic Chemistry",
-      questionsSolved: 15,
-      totalQuestions: 20,
-      percentageCorrect: 80,
-    },
-  ]),
+  createData("Mathematics", 50, 60, 80),
+  createData("Physics", 30, 40, 70),
+  createData("Chemistry", 40, 50, 85),
 ];
 
 export default function CollapsibleTable() {
   return (
     <TableContainer
       component={Paper}
-      elevation={0} // Remove shadow
+      elevation={0}
       sx={{
-        width: "100%", // Full width of the screen
-        margin: 0, // Remove margin
+        width: "100%",
+        margin: 0,
         textAlign: "center",
+        borderRadius: "10px",
+        backgroundColor: "transparent", // Make the table container transparent
+        padding: "8px", // Add padding to the table container
       }}
     >
       <Table
         aria-label="collapsible table"
         sx={{
-          "& .MuiTableCell-root": { textAlign: "left" },
+          "& .MuiTableCell-root": {
+            textAlign: "center",
+            padding: "12px",
+          },
+          borderCollapse: "separate", // Allow gaps between rows
+          borderSpacing: "0 8px", // Add spacing between rows
         }}
       >
         <TableHead>
-          <TableRow>
-            <TableCell />
-            <TableCell align="right" className="font-medium text-lg">
+          <TableRow
+            sx={{ backgroundColor: "#F5F5F5", border: "1px solid #E0E0E0" }}
+          >
+            <TableCell
+              className="font-medium text-lg"
+              sx={{ fontWeight: "bold", borderRadius: "8px 0 0 8px" }}
+            >
               Subject
             </TableCell>
-            <TableCell align="center" className="font-medium text-lg">
+            <TableCell
+              align="center"
+              className="font-medium text-lg"
+              sx={{ fontWeight: "bold" }}
+            >
               Questions Solved
             </TableCell>
-            <TableCell align="center" className="font-medium text-lg">
+            <TableCell
+              align="center"
+              className="font-medium text-lg"
+              sx={{ fontWeight: "bold" }}
+            >
               Percentage Correct
+            </TableCell>
+            <TableCell
+              align="center"
+              className="font-medium text-lg"
+              sx={{ fontWeight: "bold" }}
+            >
+              Completion
             </TableCell>
           </TableRow>
         </TableHead>

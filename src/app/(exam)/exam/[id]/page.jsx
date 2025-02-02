@@ -163,7 +163,7 @@ const Page = () => {
               </button>
               <button
                 onClick={handleResetMock}
-                className="px-4 py-2 bg-red-500 text-white rounded"
+                className="px-5 py-2 bg-[#8CC63F] hover:bg-[#688d37] flex items-center rounded-md text-white font-semibold"
               >
                 Confirm Reset
               </button>

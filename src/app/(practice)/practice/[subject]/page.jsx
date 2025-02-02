@@ -1,9 +1,9 @@
 import React from 'react'
 
-const page = () => {
+const page = ({subject}) => {
   return (
     <div>
-      Practice Page X
+      Practice Page {subject}
     </div>
   )
 }

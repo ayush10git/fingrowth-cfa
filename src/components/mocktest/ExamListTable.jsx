@@ -169,7 +169,7 @@ export default function StickyHeadTable() {
   };
 
   return (
-    <Paper className="-mt-2" sx={{ width: "100%", overflow: "hidden" }} elevation={0}>
+    <Paper className="-mt-2" sx={{ width: "100%" }} elevation={0}>
       <TableContainer sx={{ maxHeight: 440 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
