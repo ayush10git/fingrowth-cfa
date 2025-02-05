@@ -45,7 +45,7 @@ function Row(props) {
           backgroundColor: "#f5f5f5", // Hover effect
         },
       }}
-      onClick={() => router.push(`/dashboard/practice/${row.subject}`)}
+      onClick={() => router.push(`/dashboard/practice/${row.subject.replace(/\s+/g, "-")}`)}
     >
       <TableCell
         component="th"
@@ -75,8 +75,10 @@ Row.propTypes = {
 
 const rows = [
   createData("Mathematics", 50, 60, 80),
-  createData("Physics", 30, 40, 70),
-  createData("Chemistry", 40, 50, 85),
+  createData("History", 47, 68, 58),
+  createData("Geography", 25, 48, 63),
+  createData("English", 45, 50, 75),
+  createData("Economics", 45, 50, 87),
 ];
 
 export default function CollapsibleTable() {
