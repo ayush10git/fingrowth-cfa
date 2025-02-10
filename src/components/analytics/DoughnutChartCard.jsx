@@ -11,7 +11,6 @@ const DoughnutChart = ({
   legends = true,
   offset,
 }) => {
-  // Total solved questions (used in tooltips to show percentages)
   const totalSolved = data.reduce((acc, val) => acc + val, 0);
 
   const doughnutData = {

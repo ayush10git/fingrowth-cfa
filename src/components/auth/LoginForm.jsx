@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-const SignupPage = () => {
+const LoginForm = () => {
   const [formData, setFormData] = useState({
     email: "",
     username: "",
@@ -23,7 +23,7 @@ const SignupPage = () => {
 
     try {
       const response = await fetch(
-        "http://hqz209bb9k9kmqnlmstwc2y6ry12zt.sdpl.in.net/auth/signup",
+        "http://hqz209bb9k9kmqnlmstwc2y6ry12zt.sdpl.in.net/auth/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -33,7 +33,7 @@ const SignupPage = () => {
 
       const data = await response.json();
 
-      console.log("Data: ",data);
+      console.log("Data: ", data);
 
       if (response.ok) {
         setMessage("Signup successful! Redirecting...");
@@ -83,23 +83,7 @@ const SignupPage = () => {
               required
             />
           </div>
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="username"
-            >
-              Username
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="username"
-              type="text"
-              placeholder="Username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          
           <div className="mb-6">
             <label
               className="block text-gray-700 text-sm font-bold mb-2"
@@ -134,4 +118,4 @@ const SignupPage = () => {
   );
 };
 
-export default SignupPage;
+export default LoginForm;
