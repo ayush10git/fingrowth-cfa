@@ -63,7 +63,7 @@ const LineGraph = ({ testResults, testDates }) => {
   };
 
   return (
-    <div className="flex flex-col w-full max-w-full p-4 bg-white rounded-md">
+    <div className="flex flex-col w-full p-4 bg-white rounded-md">
       <h2 className="text-xl font-regular mb-4">
         Timeline
       </h2>

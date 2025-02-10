@@ -12,18 +12,12 @@ const roboto = Roboto({
 export default async function DashboardLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${roboto.className} flex bg-gray-50`}>
+      <body className={`${roboto.className} bg-gray-50`}>
         <SidebarProvider defaultOpen={false}>
           <DashboardSidebar />
-          <div className="flex flex-col flex-1">
-            {/* Sidebar trigger button */}
-            <div className="p-4">
-                <Navbar />
-              
-            </div>
-
-            {/* Main content */}
-            <div className="flex-1 p-4">{children}</div>
+          <div className="">
+            <Navbar />
+            {children}
           </div>
         </SidebarProvider>
       </body>
