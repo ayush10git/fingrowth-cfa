@@ -18,6 +18,8 @@ const page = () => {
 
   return (
     <div className="absolute top-[70px] left-[65px] p-2 flex flex-col gap-4 w-[calc(100%-65px)]">
+      <h1 className="text-2xl p-2">Mock Analysis</h1>
+
       <div className="flex gap-3">
         <div className="flex flex-col gap-3">
           <Correctness
