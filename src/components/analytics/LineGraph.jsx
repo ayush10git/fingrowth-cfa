@@ -1,77 +1,29 @@
-import React from "react";
-import { Line } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  LineElement,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  Tooltip,
-  Legend,
-} from "chart.js";
+import CompletionProgress from "./CompletionProgress";
+import MockCompletionBar from "./MockCompletionBar";
 
-ChartJS.register(
-  LineElement,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  Tooltip,
-  Legend
-);
-
-const LineGraph = ({ testResults, testDates }) => {
-  const data = {
-    labels: testDates, // Use testDates for the x-axis labels
-    datasets: [
-      {
-        data: testResults,
-        fill: false,
-        backgroundColor: "#8E6FD8",
-        borderColor: "#8E6FD8",
-        pointBackgroundColor: "#1E40AF",
-        pointBorderColor: "#fff",
-        tension: 0,
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false,
-      },
-    },
-    scales: {
-      x: {
-        ticks: {
-          autoSkip: true,
-          maxRotation: 45,
-          minRotation: 0,
-        },
-      },
-      y: {
-        beginAtZero: true,
-        max: 100,
-        ticks: {
-          stepSize: 10,
-        },
-      },
-    },
-  };
-
+const SubjectCompletions = () => {
   return (
-    <div className="flex flex-col w-full p-4 bg-white rounded-md">
-      <h2 className="text-xl font-regular mb-4">
-        Timeline
-      </h2>
-      <div className="w-full h-[350px]">
-        <Line data={data} options={options} />
+    <div className="pl-7 py-4 bg-white rounded-md w-full">
+      <h1 className="mb-4 text-xl">Completion</h1>
+      <div className="flex gap-10">
+        <div className="w-[85%] flex flex-col gap-3">
+          <CompletionProgress subject="Subject A" completion={50} />
+          <CompletionProgress subject="Subject B" completion={43} />
+          <CompletionProgress subject="Subject C" completion={62} />
+          <CompletionProgress subject="Subject D" completion={29} />
+          <CompletionProgress subject="Subject E" completion={33} />
+          <CompletionProgress subject="Subject F" completion={71} />
+          <CompletionProgress subject="Subject G" completion={44} />
+          <CompletionProgress subject="Subject H" completion={16} />
+          <CompletionProgress subject="Subject I" completion={27} />
+          <CompletionProgress subject="Subject J" completion={59} />
+        </div>
+        <div className="">
+          <MockCompletionBar subject="Mock Completion" completion={40} />
+        </div>
       </div>
     </div>
   );
 };
 
-export default LineGraph;
+export default SubjectCompletions;

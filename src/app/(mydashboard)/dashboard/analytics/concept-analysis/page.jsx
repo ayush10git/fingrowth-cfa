@@ -1,6 +1,9 @@
 import Completion from "@/components/analytics/concept-analysis/Completion";
 import { CompletionTable } from "@/components/analytics/concept-analysis/CompletionTable";
-import ToggleGraphs from "@/components/analytics/concept-analysis/ToggleGraphs";
+import CorrectnessBarGraph from "@/components/analytics/concept-analysis/CorrectnessBarGraph";
+import QuestionType from "@/components/analytics/concept-analysis/QuestionType";
+import SubjectWiseCompletion from "@/components/analytics/concept-analysis/SubjectWiseCompletion";
+import Confidence from "@/components/analytics/mock-analysis/Confidence";
 import Correctness from "@/components/analytics/mock-analysis/Correctness";
 import CollapsibleTable from "@/components/practice/TopicsTable";
 import React from "react";
@@ -13,6 +16,7 @@ const page = () => {
   const incorrectPercentage = (100 - correctPercentage).toFixed(1);
   return (
     <div className="absolute top-[70px] left-[65px] p-2 w-[calc(100%-65px)] flex flex-col gap-4">
+    <h1 className="text-2xl p-2">Conecpt Analysis</h1>
       <div className="flex gap-3">
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-center gap-3">
@@ -31,12 +35,19 @@ const page = () => {
               legends={false}
             />
           </div>
-          <ToggleGraphs />
+          <CorrectnessBarGraph />
         </div>
         <CompletionTable />
       </div>
+      <div className="flex gap-3">
+        <SubjectWiseCompletion />
+        <div className="flex flex-col gap-3">
+          <Confidence />
+          <QuestionType />
+        </div>
+      </div>
       <div className="bg-white p-4 rounded-lg">
-      <h1 className="text-lg ">Practice</h1>
+        <h1 className="text-lg ">Practice</h1>
         <CollapsibleTable />
       </div>
     </div>

@@ -46,7 +46,7 @@ const DoughnutChart = ({
   };
 
   return (
-    <div className="p-5 w-[600px] h-[330px] rounded-[10px] flex flex-col max-w-full bg-white">
+    <div className="p-5 min-w-[600px] w-full h-[330px] rounded-[10px] flex flex-col max-w-full bg-white">
       <h1 className="text-xl font-medium mb-5">
         Total Questions Solved
       </h1>

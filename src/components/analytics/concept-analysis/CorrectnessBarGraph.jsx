@@ -30,20 +30,17 @@ const getBarColor = (value) => {
   return "#F44336"; // Red
 };
 
-const BarGraph = () => {
+const CorrectnessBarGraph = () => {
   return (
     <div className="p-5 w-full h-[660px] max-w-full bg-white rounded-lg">
       <h2 className="text-lg font-medium mb-3">Correctness</h2>
       <ResponsiveContainer width="100%" height={580}>
-        <BarChart
-          data={data}
-          margin={{ top: 20, right: 20, bottom: 20 }}
-        >
+        <BarChart data={data} margin={{ top: 20, right: 20, bottom: 20 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <YAxis domain={[0, 100]} />
           <Tooltip formatter={(value) => `Score: ${value}`} />
-          <Bar dataKey="value" barSize={25} radius={[10, 10, 0, 0]}>
+          <Bar dataKey="value" barSize={25}>
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={getBarColor(entry.value)} />
             ))}
@@ -54,4 +51,4 @@ const BarGraph = () => {
   );
 };
 
-export default BarGraph;
+export default CorrectnessBarGraph;

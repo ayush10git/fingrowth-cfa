@@ -24,7 +24,7 @@ export const DetailReviewQuestionTable = ({ questions, questionAttempts }) => {
   });
 
   return (
-    <TableContainer sx={{ marginTop: 1, paddingX: 2 }} className="bg-white">
+    <TableContainer sx={{ marginTop: 1, paddingX: 2 }}>
       <Table>
         <TableHead>
           <TableRow>

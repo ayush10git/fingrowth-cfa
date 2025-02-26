@@ -25,25 +25,20 @@ const data = [
 
 // Function to determine bar color based on value
 const getBarColor = (value) => {
-  if (value > 75) return "#4CAF50"; // Green
-  if (value >= 50) return "#FFEB3B"; // Yellow
-  return "#F44336"; // Red
+  return "#8E6FD8"; 
 };
 
-const BarGraph = () => {
+const SubjectWiseCompletion = () => {
   return (
-    <div className="p-5 w-full h-[660px] max-w-full bg-white rounded-lg">
-      <h2 className="text-lg font-medium mb-3">Correctness</h2>
+    <div className="p-3 w-full h-[710px] max-w-full bg-white rounded-lg">
+      <h2 className="text-lg font-medium my-3 ml-3">Subject Wise Completion</h2>
       <ResponsiveContainer width="100%" height={580}>
-        <BarChart
-          data={data}
-          margin={{ top: 20, right: 20, bottom: 20 }}
-        >
+        <BarChart data={data} margin={{ top: 20, right: 20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <YAxis domain={[0, 100]} />
           <Tooltip formatter={(value) => `Score: ${value}`} />
-          <Bar dataKey="value" barSize={25} radius={[10, 10, 0, 0]}>
+          <Bar dataKey="value" barSize={25}>
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={getBarColor(entry.value)} />
             ))}
@@ -54,4 +49,4 @@ const BarGraph = () => {
   );
 };
 
-export default BarGraph;
+export default SubjectWiseCompletion;

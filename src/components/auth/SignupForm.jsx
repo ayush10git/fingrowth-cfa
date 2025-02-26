@@ -1,5 +1,6 @@
 "use client"; // Required for Next.js App Router
 
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 const SignupPage = () => {
@@ -11,6 +12,7 @@ const SignupPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const router = useRouter();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -26,25 +28,28 @@ const SignupPage = () => {
         "http://hqz209bb9k9kmqnlmstwc2y6ry12zt.sdpl.in.net/auth/signup",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+
+          body: JSON.stringify({
+            email: formData.email,
+            username: formData.username,
+            password: formData.password,
+          }),
+          redirect: "follow",
         }
       );
 
-      const data = await response.json();
+      const result = await response.json();
+      console.log("Response:", result);
 
-      console.log("Data: ",data);
-
-      if (response.ok) {
+      if (result.success) {
         setMessage("Signup successful! Redirecting...");
-        setTimeout(() => {
-          window.location.href = "/auth/login"; // Redirect to login page
-        }, 2000);
+        setTimeout(() => router.push("/auth/login"), 2000);
       } else {
-        setMessage(data.message || "Signup failed. Please try again.");
+        setMessage(result.message || "Signup failed. Please try again.");
       }
     } catch (error) {
-      setMessage("Error signing up. Please try again.");
+      console.error("Signup Error:", error);
+      setMessage("Signup failed. Please try again.");
     }
 
     setLoading(false);

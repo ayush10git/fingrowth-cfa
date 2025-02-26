@@ -51,7 +51,7 @@ const Correctness = ({
   };
 
   return (
-    <div className="p-5 w-[450px] h-[300px] rounded-[10px] flex flex-col max-w-full bg-white">
+    <div className="p-5 w-[520px] h-[300px] rounded-[10px] flex flex-col max-w-full bg-white">
       <h1 className="text-xl font-medium mb-5">Correctness</h1>
       <div className="flex flex-wrap items-center justify-center mt-5">
         <div className="relative w-[280px] h-[110px]"> {/* Half the height */}
