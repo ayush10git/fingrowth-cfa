@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -14,150 +14,72 @@ const columns = [
   { id: "date", label: "Date", minWidth: 100, align: "center" },
   { id: "title", label: "Title", minWidth: 170, align: "center" },
   { id: "status", label: "Status", minWidth: 150, align: "center" },
-  { id: "totalQuestions", label: "Total Questions", minWidth: 100, align: "center" },
+  {
+    id: "totalQuestions",
+    label: "Total Questions",
+    minWidth: 100,
+    align: "center",
+  },
   { id: "totalTime", label: "Total Time", minWidth: 100, align: "center" },
   { id: "score", label: "Score", minWidth: 150, align: "center" },
   { id: "action", label: "Action", minWidth: 150, align: "center" },
 ];
 
-function createData(id, date, title, status, totalQuestions, totalTime, score, action) {
-  return { id, date, title, status, totalQuestions, totalTime, score, action };
-}
-
-const rows = [
-  createData(
-    1,
-    "02/10/24",
-    "Mock Test 1",
-    "Complete",
-    90,
-    "02:15:00",
-    "355/500",
-    "View Solution"
-  ),
-  createData(
-    2,
-    "02/10/24",
-    "Mock Test 2",
-    "Complete",
-    90,
-    "02:15:00",
-    "391/500",
-    "View Solution"
-  ),
-  createData(
-    3,
-    "02/10/24",
-    "Mock Test 3",
-    "Complete",
-    90,
-    "02:15:00",
-    "289/500",
-    "View Solution"
-  ),
-  createData(
-    4,
-    "02/10/24",
-    "Mock Test 4",
-    "Complete",
-    90,
-    "02:15:00",
-    "265/500",
-    "View Solution"
-  ),
-  createData(
-    5,
-    "02/10/24",
-    "Mock Test 5",
-    "Complete",
-    90,
-    "02:15:00",
-    "411/500",
-    "View Solution"
-  ),
-  createData(
-    6,
-    "02/10/24",
-    "Mock Test 6",
-    "Incomplete",
-    90,
-    "02:15:00",
-    "--",
-    "Take Test"
-  ),
-  createData(
-    7,
-    "02/10/24",
-    "Mock Test 7",
-    "Incomplete",
-    90,
-    "02:15:00",
-    "--",
-    "Take Test"
-  ),
-  createData(
-    8,
-    "02/10/24",
-    "Mock Test 8",
-    "Incomplete",
-    90,
-    "02:15:00",
-    "--",
-    "Take Test"
-  ),
-  createData(
-    9,
-    "02/10/24",
-    "Mock Test 9",
-    "Incomplete",
-    90,
-    "02:15:00",
-    "--",
-    "Take Test"
-  ),
-  createData(
-    10,
-    "02/10/24",
-    "Mock Test 10",
-    "Incomplete",
-    90,
-    "02:15:00",
-    "--",
-    "Take Test"
-  ),
-];
-
-// Function to apply color based on the status
 const getStatusStyle = (status) => {
   return status === "Complete" ? { color: "green" } : { color: "red" };
 };
 
-// Render the Action button and navigate to /exam/{id}
-const renderActionButton = (row, router) => {
-  const color = row.status === "Complete" ? "warning" : "success";
+export default function MockTestTable() {
+  const router = useRouter();
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rows, setRows] = useState([]);
 
-  const handleClick = () => {
-    if (row.status === "Complete") {
-      router.push(`/exam/solution/${row.id}`);
-    } else {
-      router.push(`/exam/${row.id}`);
-    }
+  // Add this function to convert seconds to HH:MM:SS format
+  // Function to convert minutes to HH:MM:SS format
+  const formatTimeFromMinutes = (totalMinutes) => {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    const seconds = 0; // Since we're working with whole minutes, seconds is always 0
+
+    return [
+      hours.toString().padStart(2, "0"),
+      minutes.toString().padStart(2, "0"),
+      seconds.toString().padStart(2, "0"),
+    ].join(":");
   };
 
-  return (
-    <button
-      className="bg-[#8E6FD8] bg-opacity-70 w-[6.5rem] p-2 text-xs text-white"
-      onClick={handleClick}
-    >
-      {row.action}
-    </button>
-  );
-};
+  // Then update your formattedData mapping in the useEffect
+  useEffect(() => {
+    const authToken = localStorage.getItem("authToken");
 
-export default function StickyHeadTable() {
-  const router = useRouter(); // For navigation
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+    fetch("/api/mocktest", {
+      headers: {
+        authtoken: authToken,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          console.log(data.data);
+          const formattedData = data.data.map((item, index) => ({
+            id: item.id,
+            date: "02/10/24", // Static value
+            title: item.title,
+            status: item.total_correct > 0 ? "Complete" : "Incomplete",
+            totalQuestions: item.total_questions,
+            totalTime: formatTimeFromMinutes(item.max_time), // Convert minutes to HH:MM:SS
+            score:
+              item.total_correct > 0
+                ? `${item.total_correct * 50}/${item.max_score}`
+                : "--",
+            action: item.total_correct > 0 ? "View Solution" : "Take Test",
+          }));
+          setRows(formattedData);
+        }
+      })
+      .catch((error) => console.error("Error fetching data:", error));
+  }, []);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -168,10 +90,29 @@ export default function StickyHeadTable() {
     setPage(0);
   };
 
+  const renderActionButton = (row) => {
+    const handleClick = () => {
+      if (row.status === "Complete") {
+        router.push(`/exam/solution/${row.id}`);
+      } else {
+        router.push(`/exam/${row.id}`);
+      }
+    };
+
+    return (
+      <button
+        className="bg-[#8E6FD8] bg-opacity-70 w-[6.5rem] p-2 text-xs text-white"
+        onClick={handleClick}
+      >
+        {row.action}
+      </button>
+    );
+  };
+
   return (
     <Paper className="-mt-2" sx={{ width: "100%" }} elevation={0}>
       <TableContainer sx={{ maxHeight: 440 }}>
-        <Table stickyHeader aria-label="sticky table">
+        <Table stickyHeader aria-label="mocktest table">
           <TableHead>
             <TableRow>
               {columns.map((column) => (
@@ -189,30 +130,28 @@ export default function StickyHeadTable() {
           <TableBody>
             {rows
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => {
-                return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                    {columns.map((column) => {
-                      const value = row[column.id];
-                      return (
-                        <TableCell
-                          className="py-2"
-                          key={column.id}
-                          align="center"
-                        >
-                          {column.id === "status" ? (
-                            <span style={getStatusStyle(value)}>{value}</span>
-                          ) : column.id === "action" ? (
-                            renderActionButton(row, router)
-                          ) : (
-                            value
-                          )}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
+              .map((row) => (
+                <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                  {columns.map((column) => {
+                    const value = row[column.id];
+                    return (
+                      <TableCell
+                        className="py-2"
+                        key={column.id}
+                        align="center"
+                      >
+                        {column.id === "status" ? (
+                          <span style={getStatusStyle(value)}>{value}</span>
+                        ) : column.id === "action" ? (
+                          renderActionButton(row)
+                        ) : (
+                          value
+                        )}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>

@@ -21,7 +21,7 @@ import Image from "next/image";
 
 const items = [
   {
-    title: "Analytics",
+    title: "Overall Analytics",
     url: "/dashboard/analytics",
     icon: ChartArea,
   },

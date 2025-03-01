@@ -15,6 +15,8 @@ const Dashboard = () => {
   const correctPercentage = ((totalSolved / totalQuestions) * 100).toFixed(1);
   const incorrectPercentage = (100 - correctPercentage).toFixed(1);
 
+  console.log(localStorage.getItem("authToken"))
+
   return (
     <div className="absolute top-[60px] left-[60px] w-[calc(100vw-70px)] h-[calc(100vh-60px)] p-4 pt-6 ">
       <div className="flex items-center justify-between mb-3">

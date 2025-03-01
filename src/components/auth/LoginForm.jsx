@@ -1,9 +1,12 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const router = useRouter();
 
   const handleLogin = async () => {
     try {
@@ -21,7 +24,15 @@ export default function LoginPage() {
       );
 
       const data = await response.json();
-      console.log("Response:", data);
+
+      if (response.ok && data.authtoken) {
+        localStorage.setItem("authToken", data.authtoken);
+        router.push("/dashboard/analytics");
+      } else {
+        console.error(
+          "Login failed: Invalid credentials or missing auth token"
+        );
+      }
     } catch (error) {
       console.error("Login failed:", error);
     }

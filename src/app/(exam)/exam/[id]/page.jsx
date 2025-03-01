@@ -1,18 +1,47 @@
-"use client"
+"use client";
 import { useEffect, useState } from "react";
 import QuestionDisplay from "@/components/mocktest/QuestionDisplay";
 import MocktestNavbar from "@/components/navbar/MocktestNavbar";
 import QuestionSidebar from "@/components/sidebar/QuestionSidebar";
-import { questions } from "../../../../utils/data";
 
-const Page = () => {
-  const ques = questions.questions;
+const Page = ({ params }) => {
+  const { id } = params;
 
+  const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [bookmarkedQuestions, setBookmarkedQuestions] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
+
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      const authToken = localStorage.getItem("authToken");
+      if (!authToken) return;
+
+      try {
+        const response = await fetch(`/api/mocktest/${id}`, {
+          headers: { authtoken: authToken },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch questions");
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+          setQuestions(data.data); // Set the fetched questions
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchQuestions();
+  }, [id]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -26,7 +55,6 @@ const Page = () => {
       setCurrentQuestion(savedCurrentQuestion);
       setSelectedAnswers(savedSelectedAnswers);
       setBookmarkedQuestions(savedBookmarkedQuestions);
-      setLoading(false);
     }
   }, []);
 
@@ -84,7 +112,7 @@ const Page = () => {
   };
 
   const handleNextQuestion = () => {
-    if (currentQuestion < ques.length - 1) {
+    if (currentQuestion < questions.length - 1) {
       setCurrentQuestion((prev) => prev + 1);
     }
   };
@@ -98,7 +126,7 @@ const Page = () => {
       <MocktestNavbar currentQuestion={currentQuestion} />
       <div className="flex bg-white">
         <QuestionSidebar
-          questions={ques}
+          questions={questions}
           currentQuestion={currentQuestion}
           setCurrentQuestion={setCurrentQuestion}
           selectedAnswers={selectedAnswers}
@@ -106,15 +134,20 @@ const Page = () => {
         />
 
         <div className="flex flex-col justify-between flex-grow p-4 border border-gray-400 rounded-md m-1">
-          <QuestionDisplay
-            question={ques[currentQuestion]}
-            selectedAnswers={selectedAnswers}
-            handleAnswerSelect={handleAnswerSelect}
-            currentQuestion={currentQuestion}
-            totalQuestions={ques.length}
-            bookmarkedQuestions={bookmarkedQuestions}
-            handleBookmarkToggle={handleBookmarkToggle}
-          />
+          {questions.length > 0 ? (
+            <QuestionDisplay
+              question={questions[currentQuestion]}
+              selectedAnswers={selectedAnswers}
+              handleAnswerSelect={handleAnswerSelect}
+              currentQuestion={currentQuestion}
+              totalQuestions={questions.length}
+              bookmarkedQuestions={bookmarkedQuestions}
+              handleBookmarkToggle={handleBookmarkToggle}
+              id={id}
+            />
+          ) : (
+            <p>No questions available.</p>
+          )}
         </div>
       </div>
       <div className="flex justify-between gap-2 h-[60px] bg-[#4D4C4D] px-2 py-2 font-semibold text-white border-t-4 border-[#8CC63F]">
@@ -138,7 +171,7 @@ const Page = () => {
         </div>
         <button
           onClick={handleNextQuestion}
-          disabled={currentQuestion === ques.length - 1}
+          disabled={currentQuestion === questions.length - 1}
           className="px-7 py-3 bg-[#8CC63F] flex items-center rounded-md"
         >
           Next

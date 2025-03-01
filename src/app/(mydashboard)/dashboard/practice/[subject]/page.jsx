@@ -8,72 +8,70 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Button,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
-const data = {
-  Mathematics: [
-    "Algebra",
-    "Geometry",
-    "Calculus",
-    "Trigonometry",
-    "Probability",
-  ],
-  Science: ["Physics", "Chemistry", "Biology", "Astronomy"],
-  History: [
-    "Ancient History",
-    "Medieval History",
-    "Modern History",
-    "World Wars",
-  ],
-  Geography: [
-    "Physical Geography",
-    "Human Geography",
-    "Cartography",
-    "Climatology",
-  ],
-  English: ["Grammar", "Literature", "Writing Skills", "Poetry"],
-  Economics: [
-    "Microeconomics",
-    "Macroeconomics",
-    "International Trade",
-    "Public Finance",
-  ],
-};
-
-// Generate random stats for each topic
-const generateRandomStats = () => {
-  const totalQuestions = Math.floor(Math.random() * 50) + 10; // Between 10 and 60
-  const questionsSolved = Math.floor(Math.random() * totalQuestions);
-  const percentageSolved = ((questionsSolved / totalQuestions) * 100).toFixed(
-    1
-  );
-  const percentageCorrect = (Math.random() * 100).toFixed(1); // Random percentage correct
-  return {
-    totalQuestions,
-    questionsSolved,
-    percentageSolved,
-    percentageCorrect,
-  };
-};
-
 const Page = ({ params }) => {
   const { subject } = params;
+  
   const [topics, setTopics] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
-    if (data[subject]) {
-      setTopics(
-        data[subject].map((topic) => ({ topic, ...generateRandomStats() }))
-      );
-    }
+    const fetchTopics = async () => {
+      try {
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) {
+          setError("Authentication token is missing.");
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch(
+          `/api/subject/${subject}`,
+          {
+            headers: { authtoken: authToken },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`API responded with status ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.data.length > 0) {
+          setTopics(
+            data.data.map((topic) => ({
+              id: topic.id,
+              topic: topic.name,
+              totalQuestions: topic.total_q,
+              questionsSolved: topic.attempted,
+              percentageCorrect: parseFloat(topic.correct),
+              percentageSolved: (
+                (topic.attempted / topic.total_q) *
+                100
+              ).toFixed(1),
+            }))
+          );
+        } else {
+          setError("No topics found.");
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTopics();
   }, [subject]);
 
   return (
     <div className="fixed top-[75px] left-[75px] w-[calc(100vw-75px)] h-[calc(100vh-75px)] py-2 px-4 overflow-y-auto">
-      <h2 className="text-2xl font-bold mb-4">{subject} Topics</h2>
+      <h2 className="text-2xl font-bold mb-4">Topics</h2>
       <TableContainer
         component={Paper}
         elevation={0}
@@ -88,10 +86,7 @@ const Page = ({ params }) => {
         <Table
           aria-label="topics table"
           sx={{
-            "& .MuiTableCell-root": {
-              textAlign: "center",
-              padding: "12px",
-            },
+            "& .MuiTableCell-root": { textAlign: "center", padding: "12px" },
             borderCollapse: "separate",
             borderSpacing: "0 8px",
           }}
@@ -126,10 +121,22 @@ const Page = ({ params }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {topics.length > 0 ? (
-              topics.map((row, index) => (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center">
+                  Loading topics...
+                </TableCell>
+              </TableRow>
+            ) : error ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center" className="text-red-500">
+                  {error}
+                </TableCell>
+              </TableRow>
+            ) : topics.length > 0 ? (
+              topics.map((row) => (
                 <TableRow
-                  key={index}
+                  key={row.id}
                   sx={{
                     marginBottom: "8px",
                     backgroundColor: "white",
@@ -158,7 +165,7 @@ const Page = ({ params }) => {
                           `/dashboard/practice/${subject}/${row.topic}`
                         )
                       }
-                      className="bg-[#8E6FD8] bg-opacity-70  px-5 py-1 text-sm text-white"
+                      className="bg-[#8E6FD8] bg-opacity-70 px-5 py-1 text-sm text-white"
                     >
                       Practice
                     </button>
