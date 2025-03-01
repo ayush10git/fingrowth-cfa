@@ -1,4 +1,5 @@
-// app/api/mocktest/route.js
+export const dynamic = "force-dynamic"; 
+
 export async function GET(request) {
   try {
     // Get the authToken from the request headers
