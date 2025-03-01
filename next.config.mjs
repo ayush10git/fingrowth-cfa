@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    appDir: true,
+    serverActions: true,
   },
   output: "standalone", // Ensures the app runs as a server, preventing static rendering issues
 };

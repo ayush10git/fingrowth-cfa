@@ -12,7 +12,7 @@ const Page = ({ params }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [bookmarkedQuestions, setBookmarkedQuestions] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -24,15 +24,10 @@ const Page = ({ params }) => {
           headers: { authtoken: authToken },
         });
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch questions");
-        }
+        if (!response.ok) throw new Error("Failed to fetch questions");
 
         const data = await response.json();
-
-        if (data.success) {
-          setQuestions(data.data); // Set the fetched questions
-        }
+        if (data.success) setQuestions(data.data);
       } catch (error) {
         console.error(error);
       } finally {
@@ -40,44 +35,36 @@ const Page = ({ params }) => {
       }
     };
 
-    fetchQuestions();
-  }, [id]);
+    if (!questions.length) fetchQuestions();
+    else setLoading(false);
+  }, [id, questions.length]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const savedCurrentQuestion =
-        JSON.parse(localStorage.getItem("currentQuestion")) || 0;
-      const savedSelectedAnswers =
-        JSON.parse(localStorage.getItem("selectedAnswers")) || {};
-      const savedBookmarkedQuestions =
-        JSON.parse(localStorage.getItem("bookmarkedQuestions")) || [];
-
-      setCurrentQuestion(savedCurrentQuestion);
-      setSelectedAnswers(savedSelectedAnswers);
-      setBookmarkedQuestions(savedBookmarkedQuestions);
+      const savedData = {
+        currentQuestion:
+          JSON.parse(localStorage.getItem("currentQuestion")) || 0,
+        selectedAnswers:
+          JSON.parse(localStorage.getItem("selectedAnswers")) || {},
+        bookmarkedQuestions:
+          JSON.parse(localStorage.getItem("bookmarkedQuestions")) || [],
+      };
+      setCurrentQuestion(savedData.currentQuestion);
+      setSelectedAnswers(savedData.selectedAnswers);
+      setBookmarkedQuestions(savedData.bookmarkedQuestions);
     }
   }, []);
 
   useEffect(() => {
     if (!loading && typeof window !== "undefined") {
+      localStorage.setItem("currentQuestion", JSON.stringify(currentQuestion));
+      localStorage.setItem("selectedAnswers", JSON.stringify(selectedAnswers));
       localStorage.setItem(
         "bookmarkedQuestions",
         JSON.stringify(bookmarkedQuestions)
       );
     }
-  }, [bookmarkedQuestions, loading]);
-
-  useEffect(() => {
-    if (!loading && typeof window !== "undefined") {
-      localStorage.setItem("currentQuestion", JSON.stringify(currentQuestion));
-    }
-  }, [currentQuestion, loading]);
-
-  useEffect(() => {
-    if (!loading && typeof window !== "undefined") {
-      localStorage.setItem("selectedAnswers", JSON.stringify(selectedAnswers));
-    }
-  }, [selectedAnswers, loading]);
+  }, [currentQuestion, selectedAnswers, bookmarkedQuestions, loading]);
 
   const handleBookmarkToggle = (questionId) => {
     setBookmarkedQuestions((prev) =>
@@ -88,38 +75,32 @@ const Page = ({ params }) => {
   };
 
   const handleAnswerSelect = (questionId, answer) => {
-    setSelectedAnswers((prev) => ({
-      ...prev,
-      [questionId]: answer,
-    }));
+    setSelectedAnswers((prev) => ({ ...prev, [questionId]: answer }));
   };
 
   const handleResetMock = () => {
     setSelectedAnswers({});
     setBookmarkedQuestions([]);
-    setIsModalOpen(false); // Close modal
+    setCurrentQuestion(0);
+    setIsModalOpen(false);
 
     if (typeof window !== "undefined") {
       localStorage.removeItem("selectedAnswers");
       localStorage.removeItem("bookmarkedQuestions");
+      localStorage.setItem("currentQuestion", JSON.stringify(0));
     }
   };
 
   const handlePrevQuestion = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion((prev) => prev - 1);
-    }
+    if (currentQuestion > 0) setCurrentQuestion((prev) => prev - 1);
   };
 
   const handleNextQuestion = () => {
-    if (currentQuestion < questions.length - 1) {
+    if (currentQuestion < questions.length - 1)
       setCurrentQuestion((prev) => prev + 1);
-    }
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="px-[15rem] bg-[#DFE7EB]">
@@ -154,7 +135,11 @@ const Page = ({ params }) => {
         <button
           onClick={handlePrevQuestion}
           disabled={currentQuestion === 0}
-          className="px-7 py-3 bg-[#8CC63F] flex items-center rounded-md"
+          className={`px-7 py-3 flex items-center rounded-md ${
+            currentQuestion === 0
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-[#8CC63F]"
+          }`}
         >
           Prev
         </button>
@@ -172,13 +157,16 @@ const Page = ({ params }) => {
         <button
           onClick={handleNextQuestion}
           disabled={currentQuestion === questions.length - 1}
-          className="px-7 py-3 bg-[#8CC63F] flex items-center rounded-md"
+          className={`px-7 py-3 flex items-center rounded-md ${
+            currentQuestion === questions.length - 1
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-[#8CC63F]"
+          }`}
         >
           Next
         </button>
       </div>
 
-      {/* Reset Confirmation Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
