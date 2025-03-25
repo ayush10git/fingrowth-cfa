@@ -3,7 +3,7 @@ import { Doughnut } from "react-chartjs-2";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const PieChart = ({ labels, data, cutout, legends = true, offset }) => {
+const PieChart = ({ labels, data, cutout, legends = true, offset, subject }) => {
   const totalSolved = data.reduce((acc, val) => acc + val, 0);
 
   const backgroundColor =
@@ -56,7 +56,7 @@ const PieChart = ({ labels, data, cutout, legends = true, offset }) => {
           </div>
         </div>
       </div>
-      <span className="text-center">Subject</span>
+      <span className="text-center">{subject}</span>
     </div>
   );
 };

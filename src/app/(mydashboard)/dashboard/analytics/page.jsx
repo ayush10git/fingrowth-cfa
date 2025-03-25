@@ -5,10 +5,10 @@ import DoughnutChart from "@/components/analytics/DoughnutChartCard";
 import PieChart from "@/components/analytics/PieChart";
 import StackedBarChart from "@/components/analytics/StackedBarChart";
 import SubjectWisePerformance from "@/components/analytics/SubjectWisePerformance";
-import SubjectCompletions from "@/components/analytics/LineGraph";
+import SubjectCompletions from "@/components/analytics/SubjectWiseCompletion";
 import Link from "next/link";
 
-const Dashboard = () => {
+const page = () => {
   const totalSolved = 25 + 30 + 20;
   const totalQuestions = 65 + 55 + 50;
 
@@ -43,4 +43,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default page;

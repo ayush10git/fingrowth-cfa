@@ -10,10 +10,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const QuestionType = () => {
-  const [questionTypeData, setQuestionTypeData] = useState([
-    { name: "Conceptual", total: 0, correct: 0 },
-    { name: "Calculative", total: 0, correct: 0 },
+const PracticeConfidence = () => {
+  const [confidenceData, setConfidenceData] = useState([
+    { name: "Sure", total: 0, correct: 0 },
   ]);
 
   useEffect(() => {
@@ -23,7 +22,7 @@ const QuestionType = () => {
 
       try {
         const response = await fetch(
-          "/api/analytics/practice?for=practice_question_type",
+          "/api/analytics/practice?for=practice_confidence",
           {
             headers: { authtoken: authToken },
           }
@@ -34,24 +33,27 @@ const QuestionType = () => {
         const data = await response.json();
         console.log(data);
 
-        if (data.success && data.data.practice_question_type.length > 0) {
-          const apiData = data.data.practice_question_type[0];
+        if (data.success && data.data.practice_confidence.length > 0) {
+          const apiData = data.data.practice_confidence[0];
 
-          setQuestionTypeData([
+          // Parse as integers
+          const totalCorrect = parseInt(apiData.total_correct);
+          const totalSure = parseInt(apiData.total_sure);
+
+          // Calculate values for both categories
+          const sureCorrect = parseInt(apiData.total_sure);
+          const notSureTotal = totalCorrect - totalSure;
+
+          setConfidenceData([
             {
-              name: "Conceptual",
-              total: parseInt(apiData.total_attempted_conceptual_question),
-              correct: parseInt(apiData.total_correct_conceptual_question),
-            },
-            {
-              name: "Calculative",
-              total: parseInt(apiData.total_attempted_calculative_question),
-              correct: parseInt(apiData.total_correct_calculative_question),
+              name: "Sure",
+              total: totalCorrect,
+              correct: totalSure,
             },
           ]);
         }
       } catch (error) {
-        console.error("Error fetching question type data:", error);
+        console.error("Error fetching confidence data:", error);
       }
     };
 
@@ -60,18 +62,20 @@ const QuestionType = () => {
 
   return (
     <div className="w-full min-w-[500px] h-[320px] bg-white px-2 py-4 rounded-lg">
-      <h2 className="text-lg font-medium mb-3 ml-3">Question Type</h2>
+      <h2 className="text-lg font-medium mb-3 ml-3">Confidence</h2>
       <ResponsiveContainer width="100%" height={250}>
         <BarChart
-          data={questionTypeData}
+          data={confidenceData}
           layout="vertical" // Horizontal bar chart
-          margin={{ top: 10, right: 10, left: 10, bottom: 8 }}
+          margin={{ top: 10, right: 20, left: 10, bottom: 8 }}
         >
           <CartesianGrid strokeDasharray="3 3" horizontal={false} />
           <XAxis type="number" domain={[0, 100]} tick={false} />
-          <YAxis dataKey="name" type="category" tick={{ fontSize: 12 }} />
+          <YAxis dataKey="name" type="category" />
           <Tooltip formatter={(value, name) => [`${value}`, `${name}`]} />
+          {/* Correctly Marked (Now Lighter Purple) */}
           <Bar dataKey="correct" stackId="a" fill="#A680FF" barSize={40} />
+          {/* Total Marked (Now Darker Purple) */}
           <Bar dataKey="total" stackId="a" fill="#E4DFF1" barSize={40} />
         </BarChart>
       </ResponsiveContainer>
@@ -79,4 +83,4 @@ const QuestionType = () => {
   );
 };
 
-export default QuestionType;
+export default PracticeConfidence;

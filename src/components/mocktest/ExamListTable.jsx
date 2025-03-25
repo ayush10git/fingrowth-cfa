@@ -26,7 +26,7 @@ const columns = [
 ];
 
 const getStatusStyle = (status) => {
-  return status === "Complete" ? { color: "green" } : { color: "red" };
+  return status === "Completed" ? { color: "green" } : { color: "red" };
 };
 
 export default function MockTestTable() {
@@ -34,13 +34,24 @@ export default function MockTestTable() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [rows, setRows] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Add this function to convert seconds to HH:MM:SS format
-  // Function to convert minutes to HH:MM:SS format
-  const formatTimeFromMinutes = (totalMinutes) => {
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    const seconds = 0; // Since we're working with whole minutes, seconds is always 0
+  // Function to format a Unix timestamp to DD/MM/YY
+  const formatDate = (unixTimestamp) => {
+    const date = new Date(unixTimestamp * 1000);
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear().toString().slice(-2);
+    return `${day}/${month}/${year}`;
+  };
+
+  // Function to convert seconds to HH:MM:SS format
+  const formatTimeFromSeconds = (totalSeconds) => {
+    if (!totalSeconds) return "--";
+
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
 
     return [
       hours.toString().padStart(2, "0"),
@@ -49,36 +60,52 @@ export default function MockTestTable() {
     ].join(":");
   };
 
-  // Then update your formattedData mapping in the useEffect
   useEffect(() => {
-    const authToken = localStorage.getItem("authToken");
+    const fetchData = async () => {
+      setIsLoading(true);
+      const authToken = localStorage.getItem("authToken");
+      if (!authToken) {
+        setIsLoading(false);
+        return;
+      }
 
-    fetch("/api/mocktest", {
-      headers: {
-        authtoken: authToken,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success && data.data) {
-          console.log(data.data);
-          const formattedData = data.data.map((item, index) => ({
+      try {
+        const response = await fetch(
+          "/api/analytics/mocktest?for=mock_tests_overview",
+          {
+            headers: { authtoken: authToken },
+          }
+        );
+
+        if (!response.ok) throw new Error("Failed to fetch data");
+
+        const result = await response.json();
+        console.log("API response:", result);
+
+        if (result.success && result.data.mock_tests_overview) {
+          const formattedData = result.data.mock_tests_overview.map((item) => ({
             id: item.id,
-            date: "02/10/24", // Static value
-            title: item.title,
-            status: item.total_correct > 0 ? "Complete" : "Incomplete",
+            date: formatDate(item.mocktest_date),
+            title: item.mocktest_title,
+            status: item.status,
             totalQuestions: item.total_questions,
-            totalTime: formatTimeFromMinutes(item.max_time), // Convert minutes to HH:MM:SS
+            totalTime: formatTimeFromSeconds(item.total_time_taken),
             score:
-              item.total_correct > 0
-                ? `${item.total_correct * 50}/${item.max_score}`
+              item.score_get && item.score_get !== "0"
+                ? `${item.score_get}/${item.total_score}`
                 : "--",
-            action: item.total_correct > 0 ? "View Solution" : "Take Test",
+            action: item.status === "Completed" ? "View Solution" : "Take Test",
           }));
           setRows(formattedData);
         }
-      })
-      .catch((error) => console.error("Error fetching data:", error));
+      } catch (error) {
+        console.error("Error fetching overview data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const handleChangePage = (event, newPage) => {
@@ -92,7 +119,7 @@ export default function MockTestTable() {
 
   const renderActionButton = (row) => {
     const handleClick = () => {
-      if (row.status === "Complete") {
+      if (row.status === "Completed") {
         router.push(`/exam/solution/${row.id}`);
       } else {
         router.push(`/exam/${row.id}`);
@@ -111,59 +138,65 @@ export default function MockTestTable() {
 
   return (
     <Paper className="-mt-2" sx={{ width: "100%" }} elevation={0}>
-      <TableContainer sx={{ maxHeight: 440 }}>
-        <Table stickyHeader aria-label="mocktest table">
-          <TableHead>
-            <TableRow>
-              {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  style={{ minWidth: column.minWidth }}
-                  className="font-semibold text-base py-2"
-                >
-                  {column.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => (
-                <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                  {columns.map((column) => {
-                    const value = row[column.id];
-                    return (
-                      <TableCell
-                        className="py-2"
-                        key={column.id}
-                        align="center"
-                      >
-                        {column.id === "status" ? (
-                          <span style={getStatusStyle(value)}>{value}</span>
-                        ) : column.id === "action" ? (
-                          renderActionButton(row)
-                        ) : (
-                          value
-                        )}
-                      </TableCell>
-                    );
-                  })}
+      {isLoading ? (
+        <div className="flex justify-center items-center p-8">Loading...</div>
+      ) : (
+        <>
+          <TableContainer sx={{ maxHeight: 440 }}>
+            <Table stickyHeader aria-label="mocktest table">
+              <TableHead>
+                <TableRow>
+                  {columns.map((column) => (
+                    <TableCell
+                      key={column.id}
+                      align={column.align}
+                      style={{ minWidth: column.minWidth }}
+                      className="font-semibold text-base py-2"
+                    >
+                      {column.label}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
-        component="div"
-        count={rows.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
+              </TableHead>
+              <TableBody>
+                {rows
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => (
+                    <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                      {columns.map((column) => {
+                        const value = row[column.id];
+                        return (
+                          <TableCell
+                            className="py-2"
+                            key={column.id}
+                            align="center"
+                          >
+                            {column.id === "status" ? (
+                              <span style={getStatusStyle(value)}>{value}</span>
+                            ) : column.id === "action" ? (
+                              renderActionButton(row)
+                            ) : (
+                              value
+                            )}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 100]}
+            component="div"
+            count={rows.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </>
+      )}
     </Paper>
   );
 }

@@ -7,6 +7,7 @@ import Box from "@mui/material/Box";
 import { useState } from "react";
 import { questionAttempts, questions } from "../../../../../utils/data";
 import { ArrowUp, ArrowUpRight } from "lucide-react";
+import SolutionSidebar from "@/components/sidebar/SolutionSidebar";
 
 const Page = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -45,52 +46,17 @@ const Page = () => {
   return (
     <div className="flex w-full">
       {/* Sidebar */}
-      <div className="w-[80px] bg-[#8E6FD8] p-4 h-screen flex flex-col items-center justify-between">
-        {/* Question Numbers */}
-        <div className="flex flex-col gap-4 items-center">
-          {questions.questions.map((_, index) => {
-            const isCorrect =
-              questionAttempts.questionAttempts.find(
-                (attempt) =>
-                  attempt.question_id === questions.questions[index].question_id
-              )?.answer_given === questions.questions[index].answer;
-
-            return (
-              <div
-                key={index}
-                onClick={() => handleQuestionClick(index)}
-                className={`w-10 h-10 flex items-center justify-center rounded-full cursor-pointer text-white text-sm ${
-                  index === currentQuestionIndex
-                    ? "ring-2 ring-white"
-                    : isCorrect
-                    ? "bg-green-500"
-                    : "bg-red-500"
-                }`}
-              >
-                {index + 1}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Scroll Icon */}
-        <div className="text-white cursor-pointer">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        </div>
-      </div>
+      <SolutionSidebar
+        handleQuestionClick={handleQuestionClick}
+        totalQuestions={totalQuestions}
+        activeQuestionIndex={currentQuestionIndex}
+        questionAttempts={questionAttempts.questionAttempts.map((attempt) => ({
+          ...attempt,
+          correct_answer: questions.questions.find(
+            (q) => q.question_id === attempt.question_id
+          )?.answer,
+        }))}
+      />
 
       {/* Main Content */}
       <div className="flex flex-col gap-3 p-4 w-full">
@@ -144,7 +110,7 @@ const Page = () => {
                 {currentAttempt.answer_given === currentQuestion.answer ? (
                   <CheckCircleIcon className="text-green-500" />
                 ) : (
-                  <CancelIcon className="text-red-500"/> 
+                  <CancelIcon className="text-red-500" />
                 )}
               </span>
               <span className="">
@@ -180,7 +146,7 @@ const Page = () => {
           </div>
         </div>
 
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mt-10">
           <button
             className="px-4 py-1 rounded-md border-2 text-[#527ab6] border-[#527ab6] flex items-center gap-2 text-md disabled:border-opacity-40 disabled:text-opacity-50"
             onClick={handlePrev}

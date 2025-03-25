@@ -7,7 +7,7 @@ const Navbar = () => {
     <div className="relative z-40">
       <div className="hidden md:block lg:block">
         {/* Navbar content for larger screens, always visible */}
-        <div className="flex items-center h-[70px] w-[calc(100vw-70px)] bg-white shadow-sm overflow-x-hidden fixed top-[0px] left-[60px]">
+        <div className="flex items-center h-[70px] w-[calc(100vw-60px)] bg-white shadow-sm overflow-x-hidden fixed top-[0px] left-[60px]">
           <div className="flex w-full items-center justify-between gap-2 px-5">
             <div className="flex flex-col -gap-4">
               <span className="text-lg font-medium">Hello, Julia!</span>

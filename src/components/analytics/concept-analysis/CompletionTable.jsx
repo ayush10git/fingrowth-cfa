@@ -9,8 +9,7 @@ import {
 } from "@mui/material";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-
-export const CompletionTable = ({ questions, questionAttempts }) => {
+const CompletionTable = ({ questions, questionAttempts }) => {
   // Updated data based on the provided image
   const data = [
     { question: "Subject A", total: 52, strong: 22, average: 18, weak: 12 },
@@ -26,7 +25,8 @@ export const CompletionTable = ({ questions, questionAttempts }) => {
   ];
 
   return (
-    <TableContainer sx={{ paddingX: 2 }} className="bg-white">
+    <TableContainer sx={{ paddingX: 2 }} className="bg-white py-4">
+      <h1 className="text-xl">Completion Table</h1>
       <Table>
         <TableHead>
           <TableRow>
@@ -56,7 +56,7 @@ export const CompletionTable = ({ questions, questionAttempts }) => {
                   border: "1.5px solid #ddd",
                   borderRadius: "8px",
                   overflow: "hidden",
-                  marginBottom: "6px",
+                  marginBottom: "5px",
                   "&:last-child": {
                     marginBottom: 0, // No margin on the last row
                   },
@@ -71,7 +71,9 @@ export const CompletionTable = ({ questions, questionAttempts }) => {
 
               {/* Spacer Row */}
               {index < data.length - 1 && (
-                <TableRow sx={{ height: "8px", backgroundColor: "transparent" }}>
+                <TableRow
+                  sx={{ height: "8px", backgroundColor: "transparent" }}
+                >
                   <TableCell colSpan={5}></TableCell>
                 </TableRow>
               )}
@@ -82,3 +84,5 @@ export const CompletionTable = ({ questions, questionAttempts }) => {
     </TableContainer>
   );
 };
+
+export default CompletionTable;

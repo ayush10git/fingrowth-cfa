@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -10,19 +11,6 @@ import {
   Cell,
 } from "recharts";
 
-const data = [
-  { name: "Subject A", value: 40 },
-  { name: "Subject B", value: 60 },
-  { name: "Subject C", value: 70 },
-  { name: "Subject D", value: 90 },
-  { name: "Subject E", value: 50 },
-  { name: "Subject F", value: 75 },
-  { name: "Subject G", value: 90 },
-  { name: "Subject H", value: 70 },
-  { name: "Subject I", value: 20 },
-  { name: "Subject J", value: 30 },
-];
-
 // Function to determine bar color based on value
 const getBarColor = (value) => {
   if (value > 75) return "#4CAF50"; // Green
@@ -30,26 +18,91 @@ const getBarColor = (value) => {
   return "#F44336"; // Red
 };
 
+// Custom Tooltip Component
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-zinc-700 text-white p-2 shadow-md border rounded-md">
+        <p className="text-[12px]">{`Subject: ${payload[0].payload.name}`}</p>
+        <p className="text-[12px]">{`Score: ${payload[0].value}%`}</p>
+        <p className="text-[12px]">{`Correct: ${payload[0].payload.correct}/${payload[0].payload.total}`}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
 const BarGraph = () => {
+  const [subjectData, setSubjectData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const authToken = localStorage.getItem("authToken");
+      if (!authToken) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          "/api/analytics/mocktest?for=mock_subject_wise_correctness",
+          {
+            headers: { authtoken: authToken },
+          }
+        );
+
+        if (!response.ok) throw new Error("Failed to fetch data");
+
+        const result = await response.json();
+        console.log("API response:", result);
+
+        if (result.success && result.data.mock_subject_wise_correctness) {
+          // Process the data to calculate percentage values
+          const processedData = result.data.mock_subject_wise_correctness.map(
+            (item) => ({
+              ...item,
+              value: Math.round((item.correct / item.total) * 100), // Calculate percentage
+            })
+          );
+
+          setSubjectData(processedData);
+        }
+      } catch (error) {
+        console.error("Error fetching subject-wise data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
-    <div className="p-5 w-full h-[660px] max-w-full bg-white rounded-lg">
+    <div className="p-5 w-full h-[600px] max-w-full bg-white rounded-lg">
       <h2 className="text-lg font-medium mb-3">Correctness</h2>
-      <ResponsiveContainer width="100%" height={580}>
-        <BarChart
-          data={data}
-          margin={{ top: 20, right: 20, bottom: 20 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis domain={[0, 100]} />
-          <Tooltip formatter={(value) => `Score: ${value}`} />
-          <Bar dataKey="value" barSize={25} radius={[10, 10, 0, 0]}>
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={getBarColor(entry.value)} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+      {isLoading ? (
+        <div className="flex items-center justify-center h-full">
+          <p>Loading...</p>
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={540}>
+          <BarChart
+            data={subjectData}
+            margin={{ top: 20, right: 20, bottom: 20 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis domain={[0, 100]} />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="value" barSize={25} radius={[10, 10, 0, 0]}>
+              {subjectData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={getBarColor(entry.value)} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 };

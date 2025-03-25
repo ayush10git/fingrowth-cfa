@@ -1,5 +1,6 @@
 import QuestionSidebar from "@/components/sidebar/QuestionSidebar";
 import "../globals.css";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 export const metadata = {
   title: "Next.js",
@@ -11,7 +12,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         {/* <QuestionSidebar /> */}
-        {children}
+        <SidebarProvider defaultOpen={false}>{children}</SidebarProvider>
       </body>
     </html>
   );

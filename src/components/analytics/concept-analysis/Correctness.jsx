@@ -1,19 +1,19 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const DoughnutChart = ({
+const Correctness = ({
   labels = ["Correct", "Incorrect"],
-  backgroundColor = ["#4CAF50", "#F5F5F5"],
+  backgroundColor = ["#8E6FD8", "#F5F5F5"],
   cutout = "80%",
   legends = true,
   offset = [0, 0],
 }) => {
   const [performanceData, setPerformanceData] = useState({
-    overall_performance: { total: 0, correct: 0 },
+    practice_correctness: { total: 0, correct: 0 },
   });
 
   useEffect(() => {
@@ -22,13 +22,17 @@ const DoughnutChart = ({
       if (!authToken) return;
 
       try {
-        const response = await fetch("/api/analytics/overall?for=overall_performance", {
-          headers: { authtoken: authToken },
-        });
+        const response = await fetch(
+          "/api/analytics/practice?for=practice_correctness",
+          {
+            headers: { authtoken: authToken },
+          }
+        );
 
         if (!response.ok) throw new Error("Failed to fetch data");
 
         const data = await response.json();
+        console.log(data);
         if (data.success) {
           setPerformanceData(data.data);
         }
@@ -41,7 +45,7 @@ const DoughnutChart = ({
   }, []);
 
   // Calculate percentages
-  const { total, correct } = performanceData.overall_performance || {
+  const { total, correct } = performanceData.practice_correctness || {
     total: 0,
     correct: 0,
   };
@@ -82,16 +86,21 @@ const DoughnutChart = ({
       },
     },
     cutout,
+    rotation: -90, // Start drawing from the top
+    circumference: 180, // Draw only half of the circle
   };
 
   return (
-    <div className="p-5 min-w-[600px] w-full h-[330px] rounded-[10px] flex flex-col max-w-full bg-white">
-      <h1 className="text-xl font-medium mb-5">Overall Correctness</h1>
-      <div className="flex flex-wrap items-center justify-center">
-        <div className="relative w-[220px] h-[220px]">
+    <div className="p-5 w-[430px] h-[300px] rounded-[10px] flex flex-col max-w-full bg-white">
+      <h1 className="text-xl font-medium mb-5">Correctness</h1>
+      <div className="flex flex-wrap items-center justify-center mt-5">
+        <div className="relative w-[280px] h-[110px]">
+          {" "}
+          {/* Half the height */}
           <Doughnut data={doughnutData} options={doughnutOptions} />
-          <div className="absolute inset-0 flex flex-col justify-center items-center pointer-events-none text-[#625C5C]">
-            <span className="text-md font-medium">{data[0]}%</span>
+          <div className="absolute inset-0 flex flex-col justify-end items-center pointer-events-none text-[#625C5C]">
+            {/* Positioned at bottom center */}
+            <span className="text-lg font-medium">{data[0]}%</span>
           </div>
         </div>
       </div>
@@ -99,4 +108,4 @@ const DoughnutChart = ({
   );
 };
 
-export default DoughnutChart;
+export default Correctness;
