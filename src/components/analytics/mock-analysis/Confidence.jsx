@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import {
   BarChart,
@@ -10,43 +11,15 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const Confidence = () => {
+const Confidence = ({ isLoading = false, mockConfidenceData = null }) => {
   const [confidenceData, setConfidenceData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const authToken = localStorage.getItem("authToken");
-      if (!authToken) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          "/api/analytics/mocktest?for=mock_confidence",
-          {
-            headers: { authtoken: authToken },
-          }
-        );
-
-        if (!response.ok) throw new Error("Failed to fetch data");
-
-        const result = await response.json();
-        console.log("API response:", result);
-
-        if (result.success) {
-          setConfidenceData(result.data.mock_confidence);
-        }
-      } catch (error) {
-        console.error("Error fetching confidence data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+    // Use data from props if available
+    if (mockConfidenceData) {
+      setConfidenceData(mockConfidenceData);
+    }
+  }, [mockConfidenceData]);
 
   // Prepare the data for chart
   const prepareChartData = () => {

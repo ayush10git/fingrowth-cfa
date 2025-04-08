@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   Chart as ChartJS,
   Title,
@@ -26,53 +26,19 @@ const categories = [
   { label: "Not Assessed", color: "#F5EFFF" },
 ];
 
-export default function StackedBarChart() {
-  const [loading, setLoading] = useState(true);
-  const [rawData, setRawData] = useState([]);
-
-  useEffect(() => {
-    const fetchConceptualAnalysis = async () => {
-      const authToken = localStorage.getItem("authToken");
-      if (!authToken) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          "/api/analytics/overall?for=conceptual_analysis",
-          {
-            headers: { authtoken: authToken },
-          }
-        );
-
-        if (!response.ok)
-          throw new Error("Failed to fetch conceptual analysis data");
-
-        const responseData = await response.json();
-        console.log("API Response:", responseData);
-
-        if (responseData.success && responseData.data.conceptual_analysis) {
-          const processedData = processApiData(
-            responseData.data.conceptual_analysis
-          );
-          setRawData(processedData);
-        }
-      } catch (error) {
-        console.error("Error fetching conceptual analysis data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchConceptualAnalysis();
-  }, []);
-
+export default function StackedBarChart({ conceptualData = {}, loading = false }) {
   // Process API data into the format expected by the chart
   const processApiData = (apiData) => {
     const processedData = [];
 
+    // Only process subjects that have at least one assessed topic
     Object.keys(apiData).forEach((subject) => {
+      // Skip subjects with no topics or only empty topics
+      const hasAssessedTopics = Object.values(apiData[subject]).some(
+        (topic) => topic.total > 0
+      );
+      if (!hasAssessedTopics) return;
+
       // Initialize counters for each category
       let strongCount = 0;
       let averageCount = 0;
@@ -103,25 +69,33 @@ export default function StackedBarChart() {
         }
       });
 
-      // Convert to percentages of total topics
-      const strongPercent = (strongCount / totalTopics) * 100;
-      const averagePercent = (averageCount / totalTopics) * 100;
-      const weakPercent = (weakCount / totalTopics) * 100;
-      const notAssessedPercent = (notAssessedCount / totalTopics) * 100;
+      // Only add to processed data if there are topics
+      if (totalTopics > 0) {
+        // Convert to percentages of total topics
+        const strongPercent = (strongCount / totalTopics) * 100;
+        const averagePercent = (averageCount / totalTopics) * 100;
+        const weakPercent = (weakCount / totalTopics) * 100;
+        const notAssessedPercent = (notAssessedCount / totalTopics) * 100;
 
-      processedData.push({
-        subject: subject,
-        scores: [
-          strongPercent,
-          averagePercent,
-          weakPercent,
-          notAssessedPercent,
-        ],
-      });
+        processedData.push({
+          subject: subject,
+          scores: [
+            strongPercent,
+            averagePercent,
+            weakPercent,
+            notAssessedPercent,
+          ],
+        });
+      }
     });
 
-    return processedData;
+    // Limit to 10 subjects to prevent chart overcrowding
+    return processedData.slice(0, 20);
   };
+
+  const rawData = Object.keys(conceptualData).length > 0 
+    ? processApiData(conceptualData) 
+    : [];
 
   const data = {
     labels: rawData.map((item) => item.subject),

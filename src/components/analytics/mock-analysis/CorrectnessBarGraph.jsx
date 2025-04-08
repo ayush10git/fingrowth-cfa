@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import {
   BarChart,
@@ -32,51 +33,21 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-const BarGraph = () => {
+const BarGraph = ({ isLoading = false, subjectWiseData = null }) => {
   const [subjectData, setSubjectData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const authToken = localStorage.getItem("authToken");
-      if (!authToken) {
-        setIsLoading(false);
-        return;
-      }
+    // Use data from props if available
+    if (subjectWiseData) {
+      // Process the data to calculate percentage values
+      const processedData = subjectWiseData.map((item) => ({
+        ...item,
+        value: Math.round((item.correct / item.total) * 100), // Calculate percentage
+      }));
 
-      try {
-        const response = await fetch(
-          "/api/analytics/mocktest?for=mock_subject_wise_correctness",
-          {
-            headers: { authtoken: authToken },
-          }
-        );
-
-        if (!response.ok) throw new Error("Failed to fetch data");
-
-        const result = await response.json();
-        console.log("API response:", result);
-
-        if (result.success && result.data.mock_subject_wise_correctness) {
-          // Process the data to calculate percentage values
-          const processedData = result.data.mock_subject_wise_correctness.map(
-            (item) => ({
-              ...item,
-              value: Math.round((item.correct / item.total) * 100), // Calculate percentage
-            })
-          );
-
-          setSubjectData(processedData);
-        }
-      } catch (error) {
-        console.error("Error fetching subject-wise data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+      setSubjectData(processedData);
+    }
+  }, [subjectWiseData]);
 
   return (
     <div className="p-5 w-full h-[600px] max-w-full bg-white rounded-lg">

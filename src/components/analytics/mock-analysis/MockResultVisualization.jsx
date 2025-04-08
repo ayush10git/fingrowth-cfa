@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Tooltip from "@mui/material/Tooltip";
 
-const MockResultsVisualization = () => {
-  const [isLoading, setIsLoading] = useState(true);
+const MockResultsVisualization = ({ isLoading, mockVisualizationData }) => {
   const [mockData, setMockData] = useState([]);
 
   // Color palette for subjects
@@ -20,9 +19,11 @@ const MockResultsVisualization = () => {
     Economics: "#cedb9c",
   };
 
-  // Process the API data into the format needed for visualization
-  const processApiData = (apiData) => {
-    const processedData = Object.entries(apiData).map(
+  // Process the data into the format needed for visualization
+  const processData = (data) => {
+    if (!data) return [];
+    
+    const processedData = Object.entries(data).map(
       ([testName, subjects]) => {
         const subjectData = Object.entries(subjects).map(
           ([subjectName, scores]) => {
@@ -47,42 +48,14 @@ const MockResultsVisualization = () => {
       }
     );
 
-    setMockData(processedData);
+    return processedData;
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const authToken = localStorage.getItem("authToken");
-      if (!authToken) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          "/api/analytics/mocktest?for=mock_what_made_you_score_less",
-          {
-            headers: { authtoken: authToken },
-          }
-        );
-
-        if (!response.ok) throw new Error("Failed to fetch data");
-
-        const result = await response.json();
-        console.log("API response:", result);
-
-        if (result.success) {
-          processApiData(result.data.mock_what_made_you_score_less);
-        }
-      } catch (error) {
-        console.error("Error fetching mock analysis data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+    if (mockVisualizationData) {
+      setMockData(processData(mockVisualizationData));
+    }
+  }, [mockVisualizationData]);
 
   if (isLoading) {
     return (
@@ -92,7 +65,7 @@ const MockResultsVisualization = () => {
     );
   }
 
-  if (mockData.length === 0) {
+  if (!mockVisualizationData || mockData.length === 0) {
     return (
       <div className="p-4 bg-white rounded-md flex items-center justify-center h-64">
         <div className="text-xl text-gray-500">No data available</div>

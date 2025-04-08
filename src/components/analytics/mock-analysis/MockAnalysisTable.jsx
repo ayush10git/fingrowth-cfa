@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import {
   Table,
@@ -24,45 +25,17 @@ const defaultSubjects = [
   "Economics",
 ];
 
-const MockAnalysisTable = () => {
+const MockAnalysisTable = ({ isLoading = false, mockAnalysisData = null }) => {
   const router = useRouter();
   const [mockData, setMockData] = useState([]);
   const [subjects, setSubjects] = useState(defaultSubjects);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const authToken = localStorage.getItem("authToken");
-      if (!authToken) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          "/api/analytics/mocktest?for=mock_analysis",
-          {
-            headers: { authtoken: authToken },
-          }
-        );
-
-        if (!response.ok) throw new Error("Failed to fetch data");
-
-        const result = await response.json();
-        console.log("API response:", result);
-
-        if (result.success) {
-          processApiData(result.data.mock_analysis);
-        }
-      } catch (error) {
-        console.error("Error fetching mock analysis data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+    // Process API data if it's available in props
+    if (mockAnalysisData) {
+      processApiData(mockAnalysisData);
+    }
+  }, [mockAnalysisData]);
 
   const processApiData = (apiData) => {
     if (!apiData) return;

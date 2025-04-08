@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import {
   Table,
@@ -15,53 +16,23 @@ import {
 
 const filterOptions = ["All", "Correct", "Incorrect"];
 
-const TimeAnalysisTable = () => {
+const TimeAnalysisTable = ({ isLoading = false, timeAnalysisData = null }) => {
   const [filter, setFilter] = useState("All");
   const [apiData, setApiData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [subjectNames, setSubjectNames] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const authToken = localStorage.getItem("authToken");
-      if (!authToken) {
-        setIsLoading(false);
-        return;
+    // Use data from props if available
+    if (timeAnalysisData) {
+      setApiData(timeAnalysisData);
+
+      // Extract subject names from the data
+      if (timeAnalysisData["0-30_secs"]) {
+        const subjects = Object.keys(timeAnalysisData["0-30_secs"]);
+        setSubjectNames(subjects);
       }
-
-      try {
-        const response = await fetch(
-          "/api/analytics/mocktest?for=mock_time_analysis",
-          {
-            headers: { authtoken: authToken },
-          }
-        );
-
-        if (!response.ok) throw new Error("Failed to fetch data");
-
-        const result = await response.json();
-        console.log("API response:", result);
-
-        if (result.success) {
-          setApiData(result.data.mock_time_analysis);
-
-          // Extract subject names from the API response
-          if (result.data.mock_time_analysis["0-30_secs"]) {
-            const subjects = Object.keys(
-              result.data.mock_time_analysis["0-30_secs"]
-            );
-            setSubjectNames(subjects);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching time analysis data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+    }
+  }, [timeAnalysisData]);
 
   // Transform API data to match the UI structure
   const prepareData = () => {

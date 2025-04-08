@@ -29,12 +29,11 @@ const getStatusStyle = (status) => {
   return status === "Completed" ? { color: "green" } : { color: "red" };
 };
 
-export default function MockTestTable() {
+export default function StickyHeadTable({ isLoading, mockTestsData }) {
   const router = useRouter();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [rows, setRows] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   // Function to format a Unix timestamp to DD/MM/YY
   const formatDate = (unixTimestamp) => {
@@ -61,52 +60,23 @@ export default function MockTestTable() {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      const authToken = localStorage.getItem("authToken");
-      if (!authToken) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          "/api/analytics/mocktest?for=mock_tests_overview",
-          {
-            headers: { authtoken: authToken },
-          }
-        );
-
-        if (!response.ok) throw new Error("Failed to fetch data");
-
-        const result = await response.json();
-        console.log("API response:", result);
-
-        if (result.success && result.data.mock_tests_overview) {
-          const formattedData = result.data.mock_tests_overview.map((item) => ({
-            id: item.id,
-            date: formatDate(item.mocktest_date),
-            title: item.mocktest_title,
-            status: item.status,
-            totalQuestions: item.total_questions,
-            totalTime: formatTimeFromSeconds(item.total_time_taken),
-            score:
-              item.score_get && item.score_get !== "0"
-                ? `${item.score_get}/${item.total_score}`
-                : "--",
-            action: item.status === "Completed" ? "View Solution" : "Take Test",
-          }));
-          setRows(formattedData);
-        }
-      } catch (error) {
-        console.error("Error fetching overview data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+    if (mockTestsData) {
+      const formattedData = mockTestsData.map((item) => ({
+        id: item.id,
+        date: formatDate(item.mocktest_date),
+        title: item.mocktest_title,
+        status: item.status,
+        totalQuestions: item.total_questions,
+        totalTime: formatTimeFromSeconds(item.total_time_taken),
+        score:
+          item.score_get && item.score_get !== "0"
+            ? `${item.score_get}/${item.total_score}`
+            : "--",
+        action: item.status === "Completed" ? "View Solution" : "Take Test",
+      }));
+      setRows(formattedData);
+    }
+  }, [mockTestsData]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);

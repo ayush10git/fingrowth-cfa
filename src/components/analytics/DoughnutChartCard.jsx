@@ -1,47 +1,21 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const DoughnutChart = ({
+  performanceData = { total: 0, correct: 0 },
+  loading = false,
   labels = ["Correct", "Incorrect"],
   backgroundColor = ["#4CAF50", "#F5F5F5"],
   cutout = "80%",
   legends = true,
   offset = [0, 0],
 }) => {
-  const [performanceData, setPerformanceData] = useState({
-    overall_performance: { total: 0, correct: 0 },
-  });
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const authToken = localStorage.getItem("authToken");
-      if (!authToken) return;
-
-      try {
-        const response = await fetch("/api/analytics/overall?for=overall_performance", {
-          headers: { authtoken: authToken },
-        });
-
-        if (!response.ok) throw new Error("Failed to fetch data");
-
-        const data = await response.json();
-        if (data.success) {
-          setPerformanceData(data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching performance data:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
   // Calculate percentages
-  const { total, correct } = performanceData.overall_performance || {
+  const { total, correct } = performanceData || {
     total: 0,
     correct: 0,
   };
@@ -88,12 +62,18 @@ const DoughnutChart = ({
     <div className="p-5 min-w-[600px] w-full h-[330px] rounded-[10px] flex flex-col max-w-full bg-white">
       <h1 className="text-xl font-medium mb-5">Overall Correctness</h1>
       <div className="flex flex-wrap items-center justify-center">
-        <div className="relative w-[220px] h-[220px]">
-          <Doughnut data={doughnutData} options={doughnutOptions} />
-          <div className="absolute inset-0 flex flex-col justify-center items-center pointer-events-none text-[#625C5C]">
-            <span className="text-md font-medium">{data[0]}%</span>
+        {loading ? (
+          <div className="flex items-center justify-center h-[220px]">
+            <p>Loading chart data...</p>
           </div>
-        </div>
+        ) : (
+          <div className="relative w-[220px] h-[220px]">
+            <Doughnut data={doughnutData} options={doughnutOptions} />
+            <div className="absolute inset-0 flex flex-col justify-center items-center pointer-events-none text-[#625C5C]">
+              <span className="text-md font-medium">{data[0]}%</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
